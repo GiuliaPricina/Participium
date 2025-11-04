@@ -9,7 +9,7 @@ const db = new sqlite3.Database('db.sqlite', (err) => {
 
 export const getUser = (username, password) => {
   return new Promise((resolve, reject) => {
-    const sql = 'SELECT * FROM user WHERE name = ?';
+    const sql = 'SELECT * FROM user WHERE mail = ?';
     db.get(sql, [username], (err, row) => {
       if (err) { 
         reject(err); 
