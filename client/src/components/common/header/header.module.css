@@ -1,0 +1,28 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background-color: var(--static-white);
+  color: var(--static-black);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.headerLogoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.headerLogo {
+  height: 32px;
+}
+
+.headerBrand {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.headerGreeting {
+  font-size: 1rem;
+}

@@ -3,7 +3,7 @@ import { useState, useActionState } from "react";
 import { Row, Col, Button, Form, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router";
 import "../App.css";
-import API from "../API/API.mjs"; 
+import API from "../../API/API.mjs";
 
 const CATEGORIES = [
   "Water Supply – Drinking Water",
@@ -14,7 +14,7 @@ const CATEGORIES = [
   "Road Signs and Traffic Lights",
   "Roads and Urban Furnishings",
   "Public Green Areas and Playgrounds",
-  "Other"
+  "Other",
 ];
 
 export function InsertReportPage(props) {
@@ -25,30 +25,39 @@ export function InsertReportPage(props) {
     try {
       // Simula chiamata API
       // const result = await API.createReport(reportData);
-      
+
       // Simulo una risposta di successo
       const result = {
         ...reportData,
         latitude: props.latitude,
         longitude: props.longitude,
-        user: props.user
+        user: props.user,
       };
-      
+
       setReportCreated(result);
 
       // NAVIGATEEEEEEEEEEEEEEEEEEEEEEEEEEE
-
     } catch (err) {
-      setMessage({ msg: err.message || err, type: 'danger' });
+      setMessage({ msg: err.message || err, type: "danger" });
     }
   };
 
   return (
     <>
       {reportCreated ? (
-        <ReportSummary report={reportCreated} user={props.user} message={message}/>
+        <ReportSummary
+          report={reportCreated}
+          user={props.user}
+          message={message}
+        />
       ) : (
-        <InsertReportForm handleInsertReport={handleInsertReport} message={message} latitude={props.latitude} longitude={props.longitude} user={props.user}/>
+        <InsertReportForm
+          handleInsertReport={handleInsertReport}
+          message={message}
+          latitude={props.latitude}
+          longitude={props.longitude}
+          user={props.user}
+        />
       )}
     </>
   );
@@ -58,22 +67,22 @@ function InsertReportForm(props) {
   const navigate = useNavigate();
   const [selectedFiles, setSelectedFiles] = useState([]); //images
   const [state, formAction, isPending] = useActionState(insertReportFunction, {
-    title: '',
-    description: '',
-    category: '',
+    title: "",
+    description: "",
+    category: "",
     anonymous: false,
-    images: []
+    images: [],
   });
 
   async function insertReportFunction(prevState, formData) {
     const reportData = {
-      title: formData.get('title'),
-      description: formData.get('description'),
-      category: formData.get('category'),
-      anonymous: formData.get('anonymous') === 'on',
+      title: formData.get("title"),
+      description: formData.get("description"),
+      category: formData.get("category"),
+      anonymous: formData.get("anonymous") === "on",
       images: selectedFiles,
       latitude: props.latitude,
-      longitude: props.longitude
+      longitude: props.longitude,
     };
 
     try {
@@ -81,11 +90,11 @@ function InsertReportForm(props) {
       return { success: true };
     } catch (error) {
       return {
-        title: '',
-        description: '',
-        category: '',
+        title: "",
+        description: "",
+        category: "",
         anonymous: false,
-        images: []
+        images: [],
       };
     }
   }
@@ -93,8 +102,8 @@ function InsertReportForm(props) {
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 3) {
-      alert('You can upload a maximum of 3 images');
-      e.target.value = '';
+      alert("You can upload a maximum of 3 images");
+      e.target.value = "";
       return;
     }
     setSelectedFiles(files);
@@ -102,12 +111,15 @@ function InsertReportForm(props) {
 
   return (
     <>
-      {isPending && <Alert variant="warning"> Please, wait for the server's response...</Alert>}
+      {isPending && (
+        <Alert variant="warning">
+          {" "}
+          Please, wait for the server's response...
+        </Alert>
+      )}
 
       <Row className="scrollable-content">
         <Col md={8}>
-
-
           <Form action={formAction}>
             <Form.Group controlId="title" className="mb-3">
               <Form.Label>Title *</Form.Label>
@@ -155,7 +167,9 @@ function InsertReportForm(props) {
                 onChange={handleFileChange}
               />
               <Form.Text className="text-muted">
-                You can upload up to 3 images. {selectedFiles.length > 0 && `${selectedFiles.length} file(s) selected.`}
+                You can upload up to 3 images.{" "}
+                {selectedFiles.length > 0 &&
+                  `${selectedFiles.length} file(s) selected.`}
               </Form.Text>
             </Form.Group>
 
@@ -168,21 +182,22 @@ function InsertReportForm(props) {
             </Form.Group>
 
             <div className="footer-buttons">
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 onClick={() => navigate && navigate(-1)}
                 disabled={isPending}
                 className="me-2"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending || selectedFiles.length === 0}>
+              <Button
+                type="submit"
+                disabled={isPending || selectedFiles.length === 0}
+              >
                 Submit Report
               </Button>
             </div>
           </Form>
-
-
         </Col>
       </Row>
     </>
@@ -195,9 +210,8 @@ function ReportSummary({ report, user }) {
   return (
     <Row className="scrollable-content">
       <Col md={8}>
-
         <h3 className="mb-4">Report Created Successfully</h3>
-        
+
         <Alert variant="success" dismissible>
           Your report has been submitted successfully!
         </Alert>
@@ -205,25 +219,48 @@ function ReportSummary({ report, user }) {
         <div className="border rounded p-4 mb-3">
           <h5>Report Details</h5>
           <hr />
-          <p><strong>Title:</strong> {report.title}</p>
-          <p><strong>Latitude:</strong> {report.latitude} <strong>Longitude:</strong> {report.longitude}</p>
-          <p><strong>Description:</strong> {report.description}</p>
-          <p><strong>Category:</strong> {report.category}</p>
-          <p><strong>Anonymous:</strong> {report.anonymous ? 'Yes' : 'No'}</p>
-          <p><strong>Images:</strong> {report.images.length} file(s) attached</p>
+          <p>
+            <strong>Title:</strong> {report.title}
+          </p>
+          <p>
+            <strong>Latitude:</strong> {report.latitude}{" "}
+            <strong>Longitude:</strong> {report.longitude}
+          </p>
+          <p>
+            <strong>Description:</strong> {report.description}
+          </p>
+          <p>
+            <strong>Category:</strong> {report.category}
+          </p>
+          <p>
+            <strong>Anonymous:</strong> {report.anonymous ? "Yes" : "No"}
+          </p>
+          <p>
+            <strong>Images:</strong> {report.images.length} file(s) attached
+          </p>
         </div>
 
-        {!report.anonymous && <div className="border rounded p-4 mb-3">
-          <h5>User Information</h5>
-          <hr />
-          <p><strong>User:</strong> {user.name || user.username}</p>
-          {user.email && <p><strong>Email:</strong> {user.email}</p>}
-        </div>}
+        {!report.anonymous && (
+          <div className="border rounded p-4 mb-3">
+            <h5>User Information</h5>
+            <hr />
+            <p>
+              <strong>User:</strong> {user.name || user.username}
+            </p>
+            {user.email && (
+              <p>
+                <strong>Email:</strong> {user.email}
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="footer-buttons">
-          <Button onClick={() => navigate && navigate('/')}> Back to Home </Button>
+          <Button onClick={() => navigate && navigate("/")}>
+            {" "}
+            Back to Home{" "}
+          </Button>
         </div>
-
       </Col>
     </Row>
   );

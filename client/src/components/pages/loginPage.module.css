@@ -1,0 +1,100 @@
+.loginContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px 20px;
+  margin-left: calc(-1 * var(--bs-gutter-x, 1rem));
+  margin-right: calc(-1 * var(--bs-gutter-x, 1rem));
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.loginTitle {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.inputField {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default);
+  background-color: var(--background-default);
+  color: var(--static-black);
+  font-size: 16px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: var(--accent-default);
+  background-color: var(--static-white);
+}
+
+.inputField::placeholder {
+  color: var(--foreground-default);
+}
+
+.loginButton {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.signupLink {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 16px;
+  color: var(--foreground-default);
+}
+
+.signupLink a,
+.linkButton {
+  color: var(--accent-default);
+  text-decoration: none;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.signupLink a:hover,
+.linkButton:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.errorMessage {
+  padding: 12px 16px;
+  border-radius: 6px;
+  background-color: var(--background-default);
+  color: var(--static-black);
+  font-size: 14px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-default);
+}
+
+.successMessage {
+  padding: 12px 16px;
+  border-radius: 6px;
+  background-color: var(--background-default);
+  color: var(--static-black);
+  font-size: 14px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-default);
+}

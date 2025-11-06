@@ -1,0 +1,11 @@
+:root {
+  --static-white: #fff;
+  --static-black: #121417;
+  --accent-default: #1280ed;
+  --accent-hover: #0d569f;
+  --link-default: #2c2ff2;
+  --link-hover: #2123b1;
+  --background-default: #f0f2f5;
+  --foreground-default: #61758a;
+  --border-default: #e5e8eb;
+}
