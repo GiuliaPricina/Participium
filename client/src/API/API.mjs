@@ -1,15 +1,8 @@
 
 const SERVER_URL = "http://localhost:3001";
 
-/**
- * Authenticates a user with the provided credentials.
- * @param {Object} credentials - User login credentials
- * @param {string} credentials.username - User email/username
- * @param {string} credentials.password - User password
- * @returns {Promise<Object>} User object with id and name
- * @throws {string} Error message if authentication fails
- */
-const logIn = async (credentials) => {
+//credential {username,password}
+const logIn = async (credentials) => { // Authenticates a user and creates a session
   const response = await fetch(SERVER_URL + "/api/sessions", {
     method: "POST",
     headers: {
@@ -27,12 +20,8 @@ const logIn = async (credentials) => {
   }
 };
 
-/**
- * Retrieves the current authenticated user's information from the server.
- * @returns {Promise<Object>} User object with id and name if authenticated
- * @throws {Object} Error object with error message if not authenticated
- */
-const getUserInfo = async () => {
+
+const getUserInfo = async () => { //get user authenticated in the session -> user {id,username,type}
   const response = await fetch(SERVER_URL + "/api/sessions/current", {
     credentials: "include",
   });
@@ -44,11 +33,8 @@ const getUserInfo = async () => {
   }
 };
 
-/**
- * Logs out the current user by destroying the session on the server.
- * @returns {Promise<null>} Returns null if logout is successful
- */
-const logOut = async () => {
+
+const logOut = async () => { //Logs out the current user by destroying the session
   const response = await fetch(SERVER_URL + "/api/sessions/current", {
     method: "DELETE",
     credentials: "include",
@@ -56,16 +42,8 @@ const logOut = async () => {
   if (response.ok) return null;
 };
 
-/**
- * Registers a new user account with the provided user data.
- * @param {Object} userData - User registration data
- * @param {string} userData.name - User full name
- * @param {string} userData.email - User email address
- * @param {string} userData.password - User password (minimum 6 characters)
- * @returns {Promise<Object>} User object with id and name if registration is successful
- * @throws {Object} Error object with validation errors or error message if registration fails
- */
-const signUp = async (userData) => {
+// userdata {username, first_name,last_name,email_notification,email,password}
+const signUp = async (userData) => { // Registers a new user 
   const response = await fetch(SERVER_URL + "/api/registration", {
     method: "POST",
     headers: {
@@ -83,7 +61,7 @@ const signUp = async (userData) => {
   }
 };
 
-const getAllOperators = async () => {
+const getAllOperators = async () => { //get all and only operators
   const response = await fetch(`${SERVER_URL}/api/admin`, {
     credentials: 'include'
   });
@@ -94,8 +72,8 @@ const getAllOperators = async () => {
   return await response.json();
 };
 
-
-const createMunicipalityUser = async (userData) => {
+// userdata {username, email, password,office_id}
+const createMunicipalityUser = async (userData) => { // admin creates municipality user
   const response = await fetch(`${SERVER_URL}/api/admin/createuser`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -109,7 +87,7 @@ const createMunicipalityUser = async (userData) => {
   return await response.json();
 };
 
-const getAllOffices = async () => {
+const getAllOffices = async () => { //get all roles
   const response = await fetch(`${SERVER_URL}/api/offices`, {
     credentials: "include",
   });
