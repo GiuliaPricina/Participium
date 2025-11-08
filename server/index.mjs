@@ -98,7 +98,7 @@ app.get('/api/admin', async (req, res) => {
       return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    if (req.user.username !== 'admin') {
+    if (req.user.username !== 'admin' && req.user.type!== 'operator') {
      return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -137,8 +137,6 @@ app.post('/api/admin/createuser', [
     }
   }
 });
-
-
 
 // POST /api/sessions
 app.post('/api/sessions', passport.authenticate('local'), function(req, res) {
