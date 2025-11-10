@@ -9,6 +9,8 @@ const pool = new Pool({
   port: 5432,
 });
 
+
+//given username (email) and password does the login -> searches in citizen and then onperators tables
 export const getUser = async (username, password) => {
   try {
     const sql = 'SELECT * FROM "citizens" WHERE email = $1';
@@ -36,6 +38,7 @@ export const getUser = async (username, password) => {
   }
 };
 
+//given username (email) and password does the login -> searches only in the onperators tables
 export const getOperators = async (username, password) => {
   try {
     const sql = 'SELECT * FROM "operators" WHERE email = $1';
@@ -63,6 +66,7 @@ export const getOperators = async (username, password) => {
   }
 };
 
+//ginen user data creates a citizen
 export const createUser = async (username, email,first_name,last_name , email_notifications, password) => {
   const salt = crypto.randomBytes(16).toString('hex');
 
@@ -83,6 +87,7 @@ export const createUser = async (username, email,first_name,last_name , email_no
   });
 };
 
+//returns all default offices 
 export const getAllOffices = async () => {
   try {
     const sql = 'SELECT * FROM offices';
@@ -93,6 +98,7 @@ export const getAllOffices = async () => {
   }
 };
 
+//returns all operators with its data 
 export const getAllOperators = async () => {
   try {
     const sql = `
@@ -115,6 +121,7 @@ export const getAllOperators = async () => {
   }
 };
 
+//given operator data creates an operator
 export const createMunicipalityUser = async (email, username, password, office_id) => {
   const salt = crypto.randomBytes(16).toString('hex');
 

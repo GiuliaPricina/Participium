@@ -50,9 +50,9 @@ app.use(passport.authenticate('session'));
 
 /* ROUTES */
 
-// can use let id= req.user? req.user.id:0; in the APIs
+// can use req.user ={ id, username,type}
 
-// POST /api/registration
+// POST /api/registration 
 app.post('/api/registration', [
   check('username').notEmpty().withMessage('Username is required'),
   check('first_name').notEmpty().withMessage('First name is required'),
@@ -80,7 +80,7 @@ app.post('/api/registration', [
   }
 });
 
-// GET /api/offices
+// GET /api/offices -> all default offices
 app.get('/api/offices', async (req, res) => {
   try {
     const offices = await getAllOffices();
@@ -90,7 +90,7 @@ app.get('/api/offices', async (req, res) => {
   }
 });
 
-// GET /api/admin - Get all users
+// GET /api/admin - Get all (and only) operators
 app.get('/api/admin', async (req, res) => {
   try {
 
