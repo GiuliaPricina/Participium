@@ -108,7 +108,7 @@ export default function InsertReportPage() {
     };
 
     // API call to save the report
-    // await API.createReport(reportWithUrls);
+    await API.insertReport(reportWithUrls);
 
     setReportCreated(reportWithUrls);
   } catch (err) {

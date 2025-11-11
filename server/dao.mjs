@@ -134,11 +134,11 @@ export const insertReport = async ({citizen_id, description, image_name, image_b
 
     // Insert report into database
     const sql = `
-      INSERT INTO reports (citizen_id, description, image_name, latitude, longitude, created_at)
-      VALUES ($1, $2, $3, $4, $5, NOW())
-      RETURNING report_id, citizen_id, description, image_name, latitude, longitude, created_at
+      INSERT INTO reports (citizen_id, title, description, image_name, latitude, longitude, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      RETURNING report_id, citizen_id, title, description, image_name, latitude, longitude, created_at
     `;
-    const values = [citizen_id, description, image_name, latitude, longitude];
+    const values = [citizen_id, title, description, image_name, latitude, longitude];
     const result = await pool.query(sql, values);
     return result.rows[0];
   } catch (err) {

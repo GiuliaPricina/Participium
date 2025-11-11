@@ -171,8 +171,8 @@ app.post('/api/reports', async (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   }
   try {
-    const { description, image_name, image_bytes, latitude, longitude } = req.body;
-    const report = await insertReport({ citizen_id: req.user.id, description, image_name, image_bytes, latitude, longitude }, supabase);
+    const { title, description, image_name, image_bytes, latitude, longitude } = req.body;
+    const report = await insertReport({ citizen_id: req.user.id, title, description, image_name, image_bytes, latitude, longitude }, supabase);
     res.status(201).json(report);
   } catch (err) {
     console.error('Error inserting report:', err);

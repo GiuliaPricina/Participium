@@ -115,6 +115,19 @@ const getAllCategories = async () => {
   }
 };
 
+const insertReport = async (reportData) => {
+  const response = await fetch(`${SERVER_URL}/api/reports`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(reportData)
+  });
+  if (!response.ok) {
+    const errDetail = await response.json();
+    throw new Error(errDetail.error || 'Failed to insert report');
+  }
+  return await response.json();
+}
 
-const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, createMunicipalityUser, getAllCategories };
+const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, createMunicipalityUser, getAllCategories, insertReport };
 export default API;
