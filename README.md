@@ -10,6 +10,8 @@ admin@participium.local -  participium
 sofia1@gmail.com - sofia1
 aaaaaaaa@aaaaaaaaaaaa.com - password
 
+# PROBLEM : ROLES
+
 # DB
 
 citizens
