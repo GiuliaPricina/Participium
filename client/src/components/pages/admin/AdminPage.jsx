@@ -122,7 +122,7 @@ const getOfficeClass = (office) => {
           <table className="users-table">
             <thead>
               <tr>
-                <th>Name & Surname</th>
+                <th>Username</th>
                 <th>Login</th>
                 <th>Office</th>
                 <th>Role</th>
