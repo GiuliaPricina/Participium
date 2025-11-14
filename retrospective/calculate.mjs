@@ -79,4 +79,4 @@ const artee = absoluteRelativeTaskEstimationError(actual, estimated);
 
 // Output
 console.log("\nTotal Estimation Error Ratio:", (teer * 100).toFixed(2) + "%");
-console.log("Absolute Relative Task Estimation Error:", (artee * 100).toFixed(2) + "%");
+console.log("Absolute Relative Task Estimation Error:", (artee * 100).toFixed(2) + "%\n");

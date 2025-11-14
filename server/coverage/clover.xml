@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1763040379926" clover="3.2.0">
-  <project timestamp="1763040379927" name="All files">
+<coverage generated="1763113090546" clover="3.2.0">
+  <project timestamp="1763113090547" name="All files">
     <metrics statements="213" coveredstatements="185" conditionals="55" coveredconditionals="39" methods="39" coveredmethods="39" elements="307" coveredelements="263" complexity="0" loc="213" ncloc="213" packages="1" files="2" classes="2"/>
     <file name="dao.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\dao.mjs">
       <metrics statements="110" coveredstatements="102" conditionals="26" coveredconditionals="19" methods="23" coveredmethods="23"/>

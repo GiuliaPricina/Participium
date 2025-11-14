@@ -71,7 +71,7 @@ sections:
   - Total hours spent
     > 5 h
   - Nr of test cases
-    > 21 user cases
+    > 26 user cases
 - Code review 
   - Total hours estimated 
     > 22.5 h
@@ -86,7 +86,7 @@ sections:
 
 - What caused your errors in estimation (if any)?
 
-  > there were little estimation errors: the major cause was the difficult distribution of the hours that originates from inexperience, but we still managed to follow the planning well enough
+  > There were little estimation errors: the major cause was the difficult distribution of the hours that originates from inexperience, but we still managed to follow the planning well enough
 
 - What lessons did you learn in this sprint?
 
@@ -105,9 +105,9 @@ sections:
 
 - Improvement goals for the next sprint and how to achieve them 
 
-  > Finish the code in the first week -> code review and automatic testing on the second one
+  > Improve allocation of hours 
 
-  > Division of the code of diffrent sprint on diffrent files (BackEnd and testing) -> simpler to correct
+  > Division of the code of different sprint on different files (BackEnd and testing) -> simpler to correct
 
 - One thing you are proud of as a Team!!
   > We have solved all the problems of the previous sprint, so we are improving!!!
