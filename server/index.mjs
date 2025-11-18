@@ -2,7 +2,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import { check, validationResult } from 'express-validator';
-import { getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators, getAllRoles, getAllCategories, insertReport } from './dao.mjs';
+import { getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators, getAllRoles, getAllCategories, insertReport, getAllReports, updateReportStatus } from './dao.mjs';
 import cors from 'cors';
 
 import passport from 'passport';
@@ -253,6 +253,42 @@ app.delete('/api/sessions/current', (req, res) => {
   req.logout(() => {
     res.end();
   });
+});
+
+// GET /api/reports -> all reports (requires operator/admin)
+app.get('/api/reports', async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+    if (req.user.role !== 'Admin' && req.user.role !== 'Operator') return res.status(403).json({ error: 'Forbidden' });
+
+    const reports = await getAllReports();
+    res.status(200).json(reports);
+  } catch (err) {
+    console.error('Error fetching reports:', err);
+    res.status(503).json({ error: 'Database error during report retrieval' });
+  }
+});
+
+// PUT /api/reports/:id/status -> update status of a report (requires operator/admin)
+app.put('/api/reports/:id/status', async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+    if (req.user.role !== 'Admin' && req.user.role !== 'Operator') return res.status(403).json({ error: 'Forbidden' });
+
+    const reportId = parseInt(req.params.id, 10);
+    if (isNaN(reportId)) return res.status(422).json({ error: 'Invalid report id' });
+
+    const { status_id, rejection_reason } = req.body;
+    if (typeof status_id !== 'number') return res.status(422).json({ error: 'status_id must be a number' });
+
+    const updated = await updateReportStatus(reportId, status_id, rejection_reason || null);
+    if (!updated) return res.status(404).json({ error: 'Report not found' });
+
+    res.status(200).json(updated);
+  } catch (err) {
+    console.error('Error updating report status:', err);
+    res.status(503).json({ error: 'Database error during status update' });
+  }
 });
 
 // activate server
