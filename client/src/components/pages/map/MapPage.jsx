@@ -177,8 +177,6 @@ export function MapPage(props) {
    * Handle map click event
    */
   const handleMapClick = async (latlng) => {
-    console.log(Turin_GEOJSON);
-
     const lat = latlng.lat;
     const lng = latlng.lng;
     const coordinates = [lat, lng];
@@ -191,9 +189,9 @@ export function MapPage(props) {
     : Turin_GEOJSON;
 
 
+    // Check if the point is inside the boundaries of the city polygon
     const isInside = turf.booleanPointInPolygon(point, polygon);
     if (!isInside) {
-      //console.log("Clicked point is outside Turin city limits.");
       dispatch(clearLocation());
       return;
     }
