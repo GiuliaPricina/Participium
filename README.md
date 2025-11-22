@@ -5,8 +5,49 @@ connection to db: (docker-desktop open and running) docker compose up -d
 test: cd server; npm test ( cd server; npm run test:coverage)
 retrospective: cd retrospective; node calculate.mjs
 
+commads to reset and restart postgreSQL db : docker compose down; Remove-Item -Recurse -Force .\db_data; docker compose up -d
+
 # mail - password
 admin@participium.local -  participium
+
+-- Organization Office
+off.org@participium.local - participium
+
+-- Water Department
+off.water@participium.local - participium
+tec.water@participium.local - participium
+
+-- Accessibility Office
+off.accessibility@participium.local - participium
+tec.accessibility@participium.local - participium
+
+-- Sewage Department
+off.sewage@participium.local - participium
+tec.sewage@participium.local - participium
+
+-- Lighting Department
+off.lighting@participium.local - participium
+tec.lighting@participium.local - participium
+
+-- Waste Management
+off.waste@participium.local - participium
+tec.waste@participium.local - participium
+
+-- Traffic Department
+off.traffic@participium.local - participium
+tec.traffic@participium.local - participium
+
+-- Public Works
+off.publicworks@participium.local - participium
+tec.publicworks@participium.local - participium
+
+-- Parks Department
+off.parks@participium.local - participium
+tec.parks@participium.local - participium
+
+-- General Services
+off.general@participium.local - participium
+tec.general@participium.local - participium
 
 # DB
 
