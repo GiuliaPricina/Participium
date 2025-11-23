@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -20,10 +20,10 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import searchIcon from "../../../images/search.svg";
 import styles from "./mapPage.module.css";
 
-import Turin_GEOJSON from "../../../data/turin_geojson.json";
 import { GeoJSON } from "react-leaflet";
 import * as turf from "@turf/turf";
 import API from "../../../API/API.js";
+import { loadCityBoundaries } from "./cityBoundaries.js";
 
 // Fix for default marker icons in Leaflet with React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -168,11 +168,6 @@ function MarkerWithAutoOpen({ position, icon, children }) {
 export function MapPage(props) {
   const defaultCenter = [45.0703, 7.6868]; // Turin, Italy coordinates
   const defaultZoom = 13;
-  const turinBounds = [
-    [45.0, 7.5], // Southwest corner
-    [45.15, 7.8], // Northeast corner
-  ];
-  const cityLayer = L.geoJSON(Turin_GEOJSON);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -188,19 +183,56 @@ export function MapPage(props) {
   const [error, setError] = useState("");
   const [selectedReport, setSelectedReport] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cityBoundaries, setCityBoundaries] = useState(null);
+  const [cityBounds, setCityBounds] = useState(null);
+  const [maskPolygon, setMaskPolygon] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [reportsLoaded, setReportsLoaded] = useState(false);
+  const [boundariesLoaded, setBoundariesLoaded] = useState(false);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent double execution in StrictMode
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+
     loadReports();
+    handleLoadCityBoundaries();
   }, []);
 
-  const loadReports = async () => {
+  // Check if both reports and boundaries are loaded
+  useEffect(() => {
+    if (reportsLoaded && boundariesLoaded) {
+      setIsLoading(false);
+    }
+  }, [reportsLoaded, boundariesLoaded]);
+
+  /**
+   * Load city boundaries and create mask
+   */
+  const handleLoadCityBoundaries = useCallback(async () => {
+    try {
+      const result = await loadCityBoundaries();
+      setCityBoundaries(result.cityBoundaries);
+      setCityBounds(result.cityBounds);
+      setMaskPolygon(result.maskPolygon);
+    } catch (error) {
+      console.error("Error loading city boundaries:", error);
+    } finally {
+      setBoundariesLoaded(true);
+    }
+  }, []);
+
+  const loadReports = useCallback(async () => {
     try {
       const data = await API.getAllApprovedReports();
       setReports(data);
     } catch (error) {
       setError("Failed to load reports");
+    } finally {
+      setReportsLoaded(true);
     }
-  };
+  }, []);
 
   const handleViewDetails = (report) => {
     setSelectedReport(report);
@@ -243,17 +275,23 @@ export function MapPage(props) {
     const coordinates = [lat, lng];
 
     // Check if the clicked point is inside Turin city limits
-    const point = turf.point([latlng.lng, latlng.lat]);
-    const polygon =
-      Turin_GEOJSON.type === "FeatureCollection"
-        ? Turin_GEOJSON.features[0]
-        : Turin_GEOJSON;
+    if (cityBoundaries) {
+      const point = turf.point([latlng.lng, latlng.lat]);
+      const polygon = cityBoundaries;
 
-    // Check if the point is inside the boundaries of the city polygon
-    const isInside = turf.booleanPointInPolygon(point, polygon);
-    if (!isInside) {
-      dispatch(clearLocation());
-      return;
+      // Check if the point is inside the boundaries of the city polygon
+      const isInside = turf.booleanPointInPolygon(point, polygon);
+      if (!isInside) {
+        dispatch(clearLocation());
+        return;
+      }
+    } else if (cityBounds) {
+      // Fallback: check if point is within bounding box
+      const [sw, ne] = cityBounds;
+      if (lat < sw[0] || lat > ne[0] || lng < sw[1] || lng > ne[1]) {
+        dispatch(clearLocation());
+        return;
+      }
     }
 
     // Get address using reverse geocoding
@@ -337,100 +375,123 @@ export function MapPage(props) {
   return (
     <div className={styles.mapWrapper}>
       <div className={styles.mapContainer}>
-        <div className={styles.searchBar}>
-          <form onSubmit={handleSearch} className={styles.searchForm}>
-            <div className={styles.searchInputWrapper}>
-              <img
-                src={searchIcon}
-                alt="Search"
-                className={styles.searchIcon}
-              />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search"
-                className={styles.searchInput}
-                disabled={isSearching}
-              />
-            </div>
-            <button
-              type="submit"
-              className={styles.searchButton}
-              disabled={isSearching}
-            >
-              {isSearching ? "Searching..." : "Search"}
-            </button>
-          </form>
-          {searchError && (
-            <div className={styles.searchError}>{searchError}</div>
-          )}
-        </div>
-        <MapContainer
-          center={mapCenter}
-          zoom={mapZoom}
-          scrollWheelZoom={true}
-          className={styles.map}
-          zoomControl={false}
-          maxBounds={turinBounds}
-          maxBoundsViscosity={1.0}
-        >
-          <MapView center={mapCenter} zoom={mapZoom} />
-          <MapClickHandler onMapClick={handleMapClick} />
-          <GeoJSON
-            data={Turin_GEOJSON}
-            style={{ color: "blue", weight: 2, fill: false }}
-          />
-          <LayersControl position="bottomleft">
-            <LayersControl.BaseLayer checked name="OpenStreetMap">
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-            </LayersControl.BaseLayer>
-
-            <LayersControl.BaseLayer name="Google">
-              <TileLayer
-                url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
-                attribution="Map data © Google"
-              />
-            </LayersControl.BaseLayer>
-
-            <LayersControl.BaseLayer name="Satellite">
-              <TileLayer
-                url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
-                attribution="Map data © Google"
-              />
-            </LayersControl.BaseLayer>
-          </LayersControl>
-
-          <ApprovedReportsLayer
-            reports={reports}
-            onViewDetails={handleViewDetails}
-          />
-
-          {location.position && location.address && (
-            <MarkerWithAutoOpen position={location.position} icon={redIcon}>
-              <div>
-                <p>
-                  <strong>Address:</strong> {location.address}
-                </p>
-                <p>
-                  <strong>Coordinates:</strong>{" "}
-                  {location.coordinates.lat.toFixed(6)},{" "}
-                  {location.coordinates.lng.toFixed(6)}
-                </p>
-                <button
-                  onClick={handleCreateReport}
-                  className={styles.createReportButton}
-                >
-                  Create report
-                </button>
+        {isLoading && (
+          <div className={styles.loaderContainer}>
+            <div className={styles.loaderSpinner}></div>
+            <div className={styles.loaderText}>Loading map...</div>
+          </div>
+        )}
+        {!isLoading && (
+          <div className={styles.searchBar}>
+            <form onSubmit={handleSearch} className={styles.searchForm}>
+              <div className={styles.searchInputWrapper}>
+                <img
+                  src={searchIcon}
+                  alt="Search"
+                  className={styles.searchIcon}
+                />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search"
+                  className={styles.searchInput}
+                  disabled={isSearching}
+                />
               </div>
-            </MarkerWithAutoOpen>
-          )}
-          <ZoomControl position="bottomright" />
-        </MapContainer>
+              <button
+                type="submit"
+                className={styles.searchButton}
+                disabled={isSearching}
+              >
+                {isSearching ? "Searching..." : "Search"}
+              </button>
+            </form>
+            {searchError && (
+              <div className={styles.searchError}>{searchError}</div>
+            )}
+          </div>
+        )}
+        {!isLoading && (
+          <MapContainer
+            center={mapCenter}
+            zoom={mapZoom}
+            scrollWheelZoom={true}
+            className={styles.map}
+            zoomControl={false}
+            maxBounds={
+              cityBounds || [
+                [45.0, 7.5],
+                [45.15, 7.8],
+              ]
+            }
+            maxBoundsViscosity={1.0}
+          >
+            <MapView center={mapCenter} zoom={mapZoom} />
+            <MapClickHandler onMapClick={handleMapClick} />
+            {maskPolygon && (
+              <GeoJSON
+                key={JSON.stringify(maskPolygon)}
+                data={maskPolygon}
+                style={{
+                  fillColor: "#666666",
+                  fillOpacity: 0.6,
+                  color: "transparent",
+                  weight: 0,
+                }}
+              />
+            )}
+            <LayersControl position="bottomleft">
+              <LayersControl.BaseLayer checked name="OpenStreetMap">
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+              </LayersControl.BaseLayer>
+
+              <LayersControl.BaseLayer name="Google">
+                <TileLayer
+                  url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                  attribution="Map data © Google"
+                />
+              </LayersControl.BaseLayer>
+
+              <LayersControl.BaseLayer name="Satellite">
+                <TileLayer
+                  url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+                  attribution="Map data © Google"
+                />
+              </LayersControl.BaseLayer>
+            </LayersControl>
+
+            <ApprovedReportsLayer
+              reports={reports}
+              onViewDetails={handleViewDetails}
+            />
+
+            {location.position && location.address && (
+              <MarkerWithAutoOpen position={location.position} icon={redIcon}>
+                <div>
+                  <p>
+                    <strong>Address:</strong> {location.address}
+                  </p>
+                  <p>
+                    <strong>Coordinates:</strong>{" "}
+                    {location.coordinates.lat.toFixed(6)},{" "}
+                    {location.coordinates.lng.toFixed(6)}
+                  </p>
+                  <button
+                    onClick={handleCreateReport}
+                    className={styles.createReportButton}
+                  >
+                    Create report
+                  </button>
+                </div>
+              </MarkerWithAutoOpen>
+            )}
+            <ZoomControl position="bottomright" />
+          </MapContainer>
+        )}
       </div>
 
       {isModalOpen && selectedReport && (
