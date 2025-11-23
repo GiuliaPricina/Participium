@@ -79,6 +79,26 @@ function MapClickHandler({ onMapClick }) {
 }
 
 /**
+ * Center map on marker position
+ * @param {Object} map - Leaflet map instance
+ * @param {Array<number>} position - Marker position [lat, lng]
+ */
+function centerMapOnMarker(map, position) {
+  if (!map || !position) return;
+
+  // Get current zoom level and increase it slightly for better view
+  const currentZoom = map.getZoom();
+  const targetZoom = Math.min(currentZoom + 1, 18); // Increase zoom by 1 level, max 18
+
+  // Center map on marker with smooth animation
+  map.setView(position, targetZoom, {
+    animate: true,
+    duration: 1.0,
+    easeLinearity: 0.25,
+  });
+}
+
+/**
  * Marker component that automatically opens popup
  * @param {Object} props - Component props
  * @param {Array<number>} props.position - Marker position [lat, lng]
@@ -86,6 +106,7 @@ function MapClickHandler({ onMapClick }) {
  * @param {React.ReactNode} props.children - Popup content
  */
 function MarkerWithAutoOpen({ position, icon, children }) {
+  const map = useMap();
   const markerRef = useRef(null);
 
   useEffect(() => {
@@ -100,6 +121,8 @@ function MarkerWithAutoOpen({ position, icon, children }) {
             typeof markerInstance.openPopup === "function"
           ) {
             markerInstance.openPopup();
+            // Center map on marker with offset
+            centerMapOnMarker(map, position);
           }
         } catch (error) {
           console.error("Error opening popup:", error);
@@ -108,7 +131,7 @@ function MarkerWithAutoOpen({ position, icon, children }) {
     }, 200);
 
     return () => clearTimeout(timer);
-  }, [position]);
+  }, [position, map]);
 
   return (
     <Marker
@@ -122,8 +145,13 @@ function MarkerWithAutoOpen({ position, icon, children }) {
             const marker = e.target;
             if (marker && typeof marker.openPopup === "function") {
               marker.openPopup();
+              centerMapOnMarker(map, position);
             }
           }, 150);
+        },
+        click: () => {
+          // Center map when marker is clicked
+          centerMapOnMarker(map, position);
         },
       }}
     >
@@ -481,6 +509,36 @@ function createClusterIcon(cluster) {
 }
 
 /**
+ * Marker component with click handler to center map
+ * @param {Object} props - Component props
+ * @param {Array<number>} props.position - Marker position [lat, lng]
+ * @param {Object} props.icon - Marker icon
+ * @param {React.ReactNode} props.children - Popup content
+ */
+function CenteredMarker({ position, icon, children }) {
+  const map = useMap();
+
+  return (
+    <Marker
+      position={position}
+      icon={icon}
+      eventHandlers={{
+        click: () => {
+          // Center map when marker is clicked
+          centerMapOnMarker(map, position);
+        },
+        popupopen: () => {
+          // Also center when popup opens
+          centerMapOnMarker(map, position);
+        },
+      }}
+    >
+      {children}
+    </Marker>
+  );
+}
+
+/**
  * Component that creates a marker cluster group for reports
  * @param {Object} props - Component props
  * @param {Array} props.reports - Array of report objects
@@ -509,7 +567,7 @@ function ApprovedReportsLayer({ reports, onViewDetails }) {
       zoomToBoundsOnClick={true}
     >
       {validReports.map((report) => (
-        <Marker
+        <CenteredMarker
           key={report.id}
           position={[report.latitude, report.longitude]}
           icon={blueIcon}
@@ -520,7 +578,7 @@ function ApprovedReportsLayer({ reports, onViewDetails }) {
               onViewDetails={() => onViewDetails(report)}
             />
           </Popup>
-        </Marker>
+        </CenteredMarker>
       ))}
     </MarkerClusterGroup>
   );
