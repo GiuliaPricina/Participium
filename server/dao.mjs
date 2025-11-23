@@ -449,7 +449,7 @@ export const updateReportStatus = async (report_id, status_id, rejection_reason 
   }
 };
 
-export const getApprovedReports = async () => {
+export const getAllApprovedReports = async () => {
   try {
     const sql = `
       SELECT
