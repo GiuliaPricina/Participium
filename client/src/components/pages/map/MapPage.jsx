@@ -472,16 +472,16 @@ function ReportDetailsModal ({report, onClose}){
             <p>{new Date(report.created_at).toLocaleString()}</p>
           </div>
 
-          {report.images && report.images.length > 0 && (
+          {report.photos && report.photos.length > 0 && (
             <div className={styles.detailRow}>
               <strong>Images:</strong>
-              <div className={styles.imagesContainer}>
-                {report.images.map((imgUrl, index) => (
+              <div className={styles.photoGrid}>
+                {report.photos.map((photo, index) => (
                   <img
-                    key={index}
-                    src={imgUrl}
+                    key={photo.photo_id || index}
+                    src={photo.image_url}
                     alt={`Report Image ${index + 1}`}
-                    className={styles.reportImage}
+                    className={styles.reportPhoto}
                   />
                 ))}
               </div>
