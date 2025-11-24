@@ -5,7 +5,7 @@ import registration from './router/registration_route.mjs';
 import getAll from './router/get-all_route.mjs';
 import forms from './router/forms_route.mjs';
 import { check, validationResult } from 'express-validator';
-import { getUser, getAllReports, updateReportStatus, getAllApprovedReports,setOperatorByReport  } from "./dao.mjs";
+import { getUser, getAllReports, updateReportStatus, getAllApprovedReports, setOperatorByReport, getReportsAssigned } from "./dao.mjs";
 import cors from 'cors';
 
 import passport from 'passport';
@@ -129,6 +129,22 @@ app.get('/api/reports/approved', async (req, res) => {
   } catch (err) {
     console.error('Error fetching approved reports:', err);
     res.status(503).json({ error: 'Database error during report retrieval' });
+  }
+});
+
+
+// GET /api/reports/assigned -> reports assigned to the logged-in technical staff (requires Technical office staff member)
+app.get('/api/reports/assigned', async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+    if (req.user.role !== 'Technical office staff member') return res.status(403).json({ error: 'Forbidden' });
+
+    const operatorId = req.user.id;
+    const reports = await getReportsAssigned(operatorId);
+    res.status(200).json(reports);
+  } catch (err) {
+    console.error('Error fetching assigned reports:', err);
+    res.status(503).json({ error: 'Database error during assigned report retrieval' });
   }
 });
 
