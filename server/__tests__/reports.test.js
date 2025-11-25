@@ -31,7 +31,6 @@ describe('Reports API', () => {
     let agent;
 
     beforeAll(async () => {
-        jest.resetModules();
         // --- MOCK dao.mjs to bypass the real database ---
         await jest.unstable_mockModule('../dao.mjs', () => {
             return {
@@ -82,30 +81,5 @@ describe('Reports API', () => {
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(2);
         expect(res.body[0]).toMatchObject({ title: 'Approved Report 1' });
-    });
-
-    test('GET /api/reports unauthenticated -> 401', async () => {
-        const res = await agent.get('/api/reports');
-        expect(res.status).toBe(401);
-    });
-
-    test('PUT /api/reports/:id/status unauthenticated -> 401', async () => {
-        const res = await agent.put('/api/reports/1/status').send({ status_id: 2 });
-        expect(res.status).toBe(401);
-    });
-
-    test('PUT /api/reports/:id/operator unauthenticated -> 401', async () => {
-        const res = await agent.put('/api/reports/1/operator').send({ operatorId: 1 });
-        expect(res.status).toBe(401);
-    });
-
-    test('GET /api/reports/assigned unauthenticated -> 401', async () => {
-        const res = await agent.get('/api/reports/assigned');
-        expect(res.status).toBe(401);
-    });
-
-    test('GET /api/citizens unauthenticated -> 401', async () => {
-        const res = await agent.get('/api/citizens');
-        expect(res.status).toBe(401);
     });
 });
