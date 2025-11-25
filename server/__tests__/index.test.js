@@ -38,8 +38,10 @@ jest.mock('pg', () => {
 describe('API (index.mjs) - improved coverage', () => {
     let agent;
     let queryMock;
+    let mockCreateUser;
 
     beforeAll(async () => {
+        jest.resetModules();
         // set env values used by index.mjs
         process.env.SUPABASE_BUCKET = 'participium';
         process.env.SUPABASE_URL = 'https://supabase.test';
@@ -47,6 +49,10 @@ describe('API (index.mjs) - improved coverage', () => {
         // get the mock query reference from the mocked module
         const pg = require('pg');
         queryMock = pg.__queryMock;
+
+        mockCreateUser = jest.fn(async (username, email, first_name, last_name, email_notifications, password) => {
+            return { id: 111, username };
+        });
 
         // --- MOCK dao.mjs to bypass crypto.scrypt and provide deterministic users ---
         await jest.unstable_mockModule('../dao.mjs', () => {
@@ -64,15 +70,21 @@ describe('API (index.mjs) - improved coverage', () => {
                     // emulate failed auth
                     return null;
                 },
-                createUser: async (username, email, first_name, last_name, email_notifications, password) => {
-                    return { id: 111, username };
-                },
+                createUser: mockCreateUser,
                 getAllOffices: async () => [{ id: 1, name: 'Office A' }, { id: 2, name: 'Office B' }],
                 createMunicipalityUser: async (email, username, password, office_id, role_id) => ({ id: 222, username }),
                 getAllOperators: async () => [{ operator_id: 301, email: 'op1@example.com', username: 'op1', office_id: 1, role: 'municipality_user' }],
                 getAllRoles: async () => [{ role_id: 1, name: 'municipality_user' }],
                 getAllCategories: async () => [{ category_id: 1, name: 'Noise' }],
-                insertReport: async (obj) => ({ report_id: 555, description: obj.description || 'desc', image_name: (obj.image_urls && obj.image_urls[0]) || 'img.png' })
+                insertReport: async (obj) => ({ report_id: 555, description: obj.description || 'desc', image_name: (obj.image_urls && obj.image_urls[0]) || 'img.png' }),
+                getTechnicalOfficersByOffice: async (office_id) => [],
+                getUserInfoById: async (id) => null,
+                getAllReports: async () => [],
+                updateReportStatus: async (reportId, status_id, rejection_reason) => null,
+                getAllApprovedReports: async () => [],
+                setOperatorByReport: async (reportId, operatorId) => null,
+                getReportsAssigned: async (operatorId) => [],
+                updateUserById: async (userId, updates) => null,
             };
         });
 
@@ -279,5 +291,36 @@ describe('API (index.mjs) - improved coverage', () => {
     test('DELETE /api/sessions/current logs out', async () => {
         const res = await agent.delete('/api/sessions/current');
         expect([200, 204]).toContain(res.status);
+    });
+
+    test('POST /api/registration with duplicate user -> 409', async () => {
+        mockCreateUser.mockImplementationOnce(() => {
+            const err = new Error('duplicate key value violates unique constraint');
+            err.code = '23505';
+            throw err;
+        });
+        const payload = {
+            username: 'newuser',
+            first_name: 'First',
+            last_name: 'Last',
+            email_notifications: true,
+            email: 'new@user.it',
+            password: 'validpassword'
+        };
+        const res = await agent.post('/api/registration').send(payload);
+        expect(res.status).toBe(409);
+    });
+
+    test('POST /api/admin/createuser unauthenticated -> 401', async () => {
+        // ensure logged out
+        await agent.delete('/api/sessions/current');
+        const res = await agent.post('/api/admin/createuser').send({});
+        expect(res.status).toBe(401);
+    });
+
+    test('GET /api/operators authenticated -> 200', async () => {
+        await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+        const res = await agent.get('/api/operators?officeId=1');
+        expect(res.status).toBe(200);
     });
 });
