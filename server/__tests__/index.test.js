@@ -72,7 +72,15 @@ describe('API (index.mjs) - improved coverage', () => {
                 getAllOperators: async () => [{ operator_id: 301, email: 'op1@example.com', username: 'op1', office_id: 1, role: 'municipality_user' }],
                 getAllRoles: async () => [{ role_id: 1, name: 'municipality_user' }],
                 getAllCategories: async () => [{ category_id: 1, name: 'Noise' }],
-                insertReport: async (obj) => ({ report_id: 555, description: obj.description || 'desc', image_name: (obj.image_urls && obj.image_urls[0]) || 'img.png' })
+                insertReport: async (obj) => ({ report_id: 555, description: obj.description || 'desc', image_name: (obj.image_urls && obj.image_urls[0]) || 'img.png' }),
+                getTechnicalOfficersByOffice: async (office_id) => [],
+                getUserInfoById: async (id) => null,
+                getAllReports: async () => [],
+                updateReportStatus: async (reportId, status_id, rejection_reason) => null,
+                getAllApprovedReports: async () => [],
+                setOperatorByReport: async (reportId, operatorId) => null,
+                getReportsAssigned: async (operatorId) => [],
+                updateUserById: async (userId, updates) => null,
             };
         });
 
